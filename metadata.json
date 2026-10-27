@@ -1,0 +1,6 @@
+{
+  "name": "CardioML Diagnostic Suite",
+  "description": "Clinical machine learning platform for coronary heart disease prediction, risk stratification, and explainability.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
