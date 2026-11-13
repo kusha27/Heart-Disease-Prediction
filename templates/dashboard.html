@@ -81,6 +81,17 @@
     </div>
   </div>
 
+  <div class="card shadow border-0 mb-4">
+    <div class="card-body p-4">
+      <h4 class="text-navy">Prediction trends</h4>
+      <p class="text-muted">Saved predictions by outcome over the last six months.</p>
+      <canvas id="trendChart"></canvas>
+      {% if not trend_chart.datasets %}
+        <p class="text-muted mb-0">No prediction trends to show yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
   <div class="card shadow border-0">
     <div class="card-body p-4">
       <div class="d-flex align-items-center justify-content-between flex-wrap mb-3">
@@ -150,6 +161,15 @@
     type: 'doughnut',
     data: riskData,
     options: { responsive: true }
+  });
+
+  new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {{ trend_chart | tojson }},
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
   });
 </script>
 {% endblock %}
