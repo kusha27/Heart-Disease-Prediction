@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}HeartCare | History{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow border-0">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+          <p class="eyebrow mb-1">Records</p>
+          <h2 class="text-navy mb-0">Prediction History</h2>
+        </div>
+        <a href="{{ url_for('predict') }}" class="btn btn-primary">New Prediction</a>
+      </div>
+
+      <form class="row g-2 mb-4" method="get">
+        <div class="col-md-9">
+          <input type="text" class="form-control" name="search" value="{{ search }}" placeholder="Search by output...">
+        </div>
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+        </div>
+      </form>
+
+      {% if predictions %}
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Date & time</th>
+              <th>Input summary</th>
+              <th>Model output</th>
+              <th>Model version</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in predictions %}
+            <tr>
+              <td>{{ item['prediction_timestamp'] }}</td>
+              <td>{{ item['input_data'][:90] }}</td>
+              <td>{{ item['prediction_output'] }}</td>
+              <td>{{ item['model_version'] }}</td>
+              <td>
+                <div class="d-flex gap-2">
+                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('prediction_detail', prediction_id=item['id']) }}">View</a>
+                  <form method="post" action="{{ url_for('delete_prediction_route', prediction_id=item['id']) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <nav aria-label="Pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if page > 1 %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('history', page=page-1, search=search) }}">Previous</a></li>
+          {% endif %}
+          <li class="page-item active"><span class="page-link">{{ page }} / {{ pages }}</span></li>
+          {% if page < pages %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('history', page=page+1, search=search) }}">Next</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% else %}
+      <p class="text-muted mb-0">No prediction records match your search.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

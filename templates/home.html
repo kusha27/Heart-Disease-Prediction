@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}HeartCare | Home{% endblock %}
+{% block content %}
+<section class="hero-section py-5">
+  <div class="container">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-7">
+        <p class="eyebrow">Trusted health insights</p>
+        <h1 class="display-5 fw-bold text-navy">Heart Disease Prediction Using Machine Learning</h1>
+        <p class="lead text-muted">HeartCare helps clinicians and patients explore risk signals using a transparent, educational machine learning model based on clinical indicators.</p>
+        <div class="d-flex gap-3 flex-wrap mt-4">
+          <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">Get Started</a>
+          <a href="#features" class="btn btn-outline-primary btn-lg">Learn More</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-card shadow">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge badge-soft-red">Live monitoring</span>
+            <span class="text-muted">Updated weekly</span>
+          </div>
+          <div class="pulse-chart">
+            <div class="pulse-line"></div>
+          </div>
+          <div class="row mt-4 g-3">
+            <div class="col-6"><div class="mini-stat"><span class="mini-label">Risk estimate</span><strong>18%</strong></div></div>
+            <div class="col-6"><div class="mini-stat"><span class="mini-label">Alerts</span><strong>2</strong></div></div>
+            <div class="col-6"><div class="mini-stat"><span class="mini-label">Model</span><strong>LogReg</strong></div></div>
+            <div class="col-6"><div class="mini-stat"><span class="mini-label">History</span><strong>1.2k</strong></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features py-5 bg-soft" id="features">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card h-100">
+          <div class="feature-icon heart">❤</div>
+          <h5>Accurate Prediction</h5>
+          <p>Model evaluation is based on transparent metrics from a held-out test dataset.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card h-100">
+          <div class="feature-icon chart">📊</div>
+          <h5>Data Visualization</h5>
+          <p>View model comparisons, risk distributions, and prediction history in one place.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card h-100">
+          <div class="feature-icon shield">🔒</div>
+          <h5>Security and Privacy</h5>
+          <p>User accounts are protected with password hashing and data is kept separate by user.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="feature-card h-100">
+          <div class="feature-icon book">📘</div>
+          <h5>Health Education</h5>
+          <p>Learn heart-healthy habits and when to seek medical attention with trusted guidance.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container text-center">
+    <div class="alert alert-warning disclaimer-box mx-auto" role="alert">
+      <strong>Medical disclaimer:</strong> HeartCare provides an educational estimate only. It does not replace professional medical diagnosis, treatment, or clinical judgment.
+    </div>
+  </div>
+</section>
+{% endblock %}

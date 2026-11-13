@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}HeartCare | Dashboard{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <div class="card dashboard-hero shadow border-0">
+        <div class="card-body p-4">
+          <p class="eyebrow mb-1">Overview</p>
+          <h2 class="text-navy mb-2">Welcome back, {{ session.get('username', 'Patient') }}!</h2>
+          <p class="mb-0 text-muted">Your heart health dashboard shows the latest prediction, model metrics, and history summary.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow border-0 h-100">
+        <div class="card-body p-4">
+          <p class="eyebrow mb-1">Latest prediction</p>
+          {% if latest_prediction %}
+            <h4 class="text-navy">{{ latest_prediction['prediction_output'] }}</h4>
+            <small class="text-muted">{{ latest_prediction['prediction_timestamp'] }}</small>
+          {% else %}
+            <p class="text-muted mb-0">No predictions yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="metric-card card shadow border-0">
+        <div class="card-body">
+          <div class="metric-label">Best model</div>
+          <div class="metric-value">{{ metrics.get('selected_model_name', 'Logistic Regression') }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="metric-card card shadow border-0">
+        <div class="card-body">
+          <div class="metric-label">Accuracy</div>
+          <div class="metric-value">{{ (metrics.get('results', []) | selectattr('model', 'equalto', metrics.get('selected_model_name', 'Logistic Regression')) | map(attribute='accuracy') | list | first) or 'N/A' }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="metric-card card shadow border-0">
+        <div class="card-body">
+          <div class="metric-label">Precision</div>
+          <div class="metric-value">{{ (metrics.get('results', []) | selectattr('model', 'equalto', metrics.get('selected_model_name', 'Logistic Regression')) | map(attribute='precision') | list | first) or 'N/A' }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="metric-card card shadow border-0">
+        <div class="card-body">
+          <div class="metric-label">Recall</div>
+          <div class="metric-value">{{ (metrics.get('results', []) | selectattr('model', 'equalto', metrics.get('selected_model_name', 'Logistic Regression')) | map(attribute='recall') | list | first) or 'N/A' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="card shadow border-0">
+        <div class="card-body p-4">
+          <h4 class="text-navy">Model comparison</h4>
+          <canvas id="modelChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card shadow border-0">
+        <div class="card-body p-4">
+          <h4 class="text-navy">Risk distribution</h4>
+          <canvas id="riskChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow border-0">
+    <div class="card-body p-4">
+      <div class="d-flex align-items-center justify-content-between flex-wrap mb-3">
+        <h4 class="text-navy mb-0">Prediction history summary</h4>
+        <a href="{{ url_for('predict') }}" class="btn btn-primary btn-sm">New prediction</a>
+      </div>
+      {% if history %}
+        <div class="table-responsive">
+          <table class="table align-middle table-hover">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Summary</th>
+                <th>Output</th>
+                <th>Model</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in history %}
+              <tr>
+                <td>{{ item['prediction_timestamp'] }}</td>
+                <td>{{ item['input_data'][:80] }}</td>
+                <td>{{ item['prediction_output'] }}</td>
+                <td>{{ item['model_version'] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">No predictions have been recorded for this account yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const modelChart = new Chart(document.getElementById('modelChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ metrics.get('results', []) | map(attribute='model') | list | tojson }},
+      datasets: [{
+        label: 'Accuracy',
+        data: {{ metrics.get('results', []) | map(attribute='accuracy') | list | tojson }},
+        backgroundColor: ['#4f8ef7', '#6bbd63', '#f4b740', '#ef5a5a', '#5ec2b8', '#7a6ef2']
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, max: 1 }
+      }
+    }
+  });
+
+  const riskData = {
+    labels: {{ risk_distribution | map(attribute='prediction_output') | list | tojson }},
+    datasets: [{
+      data: {{ risk_distribution | map(attribute='total') | list | tojson }},
+      backgroundColor: ['#ef5a5a', '#6bbd63', '#f4b740']
+    }]
+  };
+
+  new Chart(document.getElementById('riskChart'), {
+    type: 'doughnut',
+    data: riskData,
+    options: { responsive: true }
+  });
+</script>
+{% endblock %}

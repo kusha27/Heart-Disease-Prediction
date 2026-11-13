@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}HeartCare | Detail{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow border-0">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-4">
+        <div>
+          <p class="eyebrow mb-1">Record</p>
+          <h2 class="text-navy mb-0">Prediction Details</h2>
+        </div>
+        <a href="{{ url_for('history') }}" class="btn btn-outline-primary">Back to history</a>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="table-responsive">
+            <table class="table table-borderless align-middle">
+              <tbody>
+                <tr><th scope="row">Date</th><td>{{ prediction['prediction_timestamp'] }}</td></tr>
+                <tr><th scope="row">Model output</th><td>{{ prediction['prediction_output'] }}</td></tr>
+                <tr><th scope="row">Model version</th><td>{{ prediction['model_version'] }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <h4 class="text-navy">Input values</h4>
+          <ul class="list-group">
+            {% for key, value in payload.items() %}
+              <li class="list-group-item d-flex justify-content-between">
+                <span>{{ key }}</span>
+                <strong>{{ value }}</strong>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}HeartCare | Prediction Result{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-xl-8">
+      <div class="card shadow border-0 result-card">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-4">
+            <div>
+              <p class="eyebrow mb-1">Prediction</p>
+              <h2 class="mb-0 text-navy">Assessment Result</h2>
+            </div>
+            <span class="badge {% if result.prediction == 1 %}bg-danger{% else %}bg-success{% endif %} fs-6 px-3 py-2">
+              {% if result.prediction == 1 %}High risk{% else %}Lower risk{% endif %}
+            </span>
+          </div>
+
+          <div class="row g-4 align-items-center">
+            <div class="col-lg-5">
+              <div class="result-meter">
+                <div class="result-value">{{ (result.probability * 100) | round(1) }}%</div>
+                <div class="result-label">Estimated probability</div>
+              </div>
+            </div>
+            <div class="col-lg-7">
+              <p class="lead mb-2"><strong>{{ result.message }}</strong></p>
+              <p class="text-muted mb-0">Model: {{ result.selected_model }} • Version: {{ result.model_version }}</p>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <h4 class="text-navy">Submitted health inputs</h4>
+            <p class="mb-3 text-muted">{{ summary }}</p>
+          </div>
+
+          <div class="alert alert-info mt-3" role="alert">
+            The model output is an educational estimate and should not be interpreted as a confirmed diagnosis. Results can be affected by dataset limitations, model calibration, and individual clinical context.
+          </div>
+
+          <div class="d-flex gap-3 flex-wrap mt-4">
+            <a href="{{ url_for('predict') }}" class="btn btn-primary">Return to Form</a>
+            <a href="{{ url_for('history') }}" class="btn btn-outline-primary">View History</a>
+            <a href="{{ url_for('education') }}" class="btn btn-outline-secondary">Health Education</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
