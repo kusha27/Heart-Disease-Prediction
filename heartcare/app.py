@@ -3,7 +3,7 @@ import io
 import json
 import os
 import secrets
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from flask import (Flask, abort, flash, make_response, redirect, render_template,
@@ -11,8 +11,10 @@ from flask import (Flask, abort, flash, make_response, redirect, render_template
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import (count_user_predictions, create_user, delete_prediction,
-                 get_all_user_predictions, get_prediction, get_user_by_email,
-                 get_user_by_id, get_user_by_username, get_user_predictions,
+                 complete_reminder, create_reminder, delete_reminder,
+                 get_all_user_predictions, get_prediction,
+                 get_user_by_email, get_user_by_id, get_user_by_username,
+                 get_user_predictions, get_user_reminders,
                  latest_prediction_for_user, prediction_trends_for_user,
                  risk_distribution_for_user, save_prediction, update_user)
 from .model_service import FEATURE_COLUMNS, predict_from_form, summarize_inputs
@@ -114,6 +116,8 @@ def create_app():
         latest = latest_prediction_for_user(user_id)
         history = get_user_predictions(user_id, limit=5, offset=0)
         distribution = risk_distribution_for_user(user_id)
+        reminders = get_user_reminders(user_id)
+        active_reminders = [reminder for reminder in reminders if not reminder["completed"]]
         trends = prediction_trends_for_user(user_id)
         month_keys = []
         month_labels = []
@@ -148,7 +152,56 @@ def create_app():
             metrics=metrics,
             risk_distribution=distribution,
             trend_chart=trend_chart,
+            active_reminders=active_reminders[:3],
+            active_reminder_count=len(active_reminders),
         )
+
+    @app.route("/reminders", methods=["GET", "POST"])
+    @login_required
+    def reminders():
+        if request.method == "POST":
+            validate_csrf()
+            due_date_value = request.form.get("due_date", "")
+            note = request.form.get("note", "").strip()
+            try:
+                due_date = datetime.strptime(due_date_value, "%Y-%m-%d").date()
+            except ValueError:
+                flash("Enter a valid reminder date.", "danger")
+                return redirect(url_for("reminders"))
+            if due_date < date.today():
+                flash("A reminder date cannot be in the past.", "danger")
+                return redirect(url_for("reminders"))
+            if len(note) > 200:
+                flash("Reminder notes must be 200 characters or fewer.", "danger")
+                return redirect(url_for("reminders"))
+            create_reminder(session["user_id"], due_date.isoformat(), note)
+            flash("Reminder created.", "success")
+            return redirect(url_for("reminders"))
+        return render_template(
+            "reminders.html",
+            reminders=get_user_reminders(session["user_id"]),
+            today=date.today().isoformat(),
+        )
+
+    @app.route("/reminders/<int:reminder_id>/complete", methods=["POST"])
+    @login_required
+    def complete_reminder_route(reminder_id):
+        validate_csrf()
+        if complete_reminder(session["user_id"], reminder_id):
+            flash("Reminder marked as complete.", "success")
+        else:
+            flash("Reminder not found or already completed.", "warning")
+        return redirect(url_for("reminders"))
+
+    @app.route("/reminders/<int:reminder_id>/delete", methods=["POST"])
+    @login_required
+    def delete_reminder_route(reminder_id):
+        validate_csrf()
+        if delete_reminder(session["user_id"], reminder_id):
+            flash("Reminder deleted.", "success")
+        else:
+            flash("Reminder not found.", "warning")
+        return redirect(url_for("reminders"))
 
     @app.route("/predict", methods=["GET", "POST"])
     @login_required

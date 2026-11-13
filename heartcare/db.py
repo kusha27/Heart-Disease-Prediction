@@ -38,6 +38,19 @@ def init_db():
             )
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS reminders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                due_date TEXT NOT NULL,
+                note TEXT NOT NULL DEFAULT '',
+                completed INTEGER NOT NULL DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+            """
+        )
 
 
 def create_user(username, email, password_hash):
@@ -186,6 +199,48 @@ def get_all_user_predictions(user_id):
             """,
             (user_id,),
         ).fetchall()
+
+
+def create_reminder(user_id, due_date, note):
+    with get_connection() as conn:
+        cursor = conn.execute(
+            "INSERT INTO reminders (user_id, due_date, note) VALUES (?, ?, ?)",
+            (user_id, due_date, note),
+        )
+        return cursor.lastrowid
+
+
+def get_user_reminders(user_id):
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT * FROM reminders
+            WHERE user_id = ?
+            ORDER BY completed ASC, due_date ASC, id DESC
+            """,
+            (user_id,),
+        ).fetchall()
+
+
+def complete_reminder(user_id, reminder_id):
+    with get_connection() as conn:
+        cursor = conn.execute(
+            """
+            UPDATE reminders SET completed = 1
+            WHERE id = ? AND user_id = ? AND completed = 0
+            """,
+            (reminder_id, user_id),
+        )
+        return cursor.rowcount > 0
+
+
+def delete_reminder(user_id, reminder_id):
+    with get_connection() as conn:
+        cursor = conn.execute(
+            "DELETE FROM reminders WHERE id = ? AND user_id = ?",
+            (reminder_id, user_id),
+        )
+        return cursor.rowcount > 0
 
 
 init_db()

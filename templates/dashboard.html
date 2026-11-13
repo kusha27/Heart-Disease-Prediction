@@ -27,6 +27,30 @@
     </div>
   </div>
 
+  <div class="card shadow border-0 mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+          <h4 class="text-navy mb-1">Follow-up reminders</h4>
+          <p class="text-muted mb-0">{{ active_reminder_count }} active reminder{% if active_reminder_count != 1 %}s{% endif %}</p>
+        </div>
+        <a href="{{ url_for('reminders') }}" class="btn btn-outline-primary btn-sm">Manage reminders</a>
+      </div>
+      {% if active_reminders %}
+        <ul class="list-group list-group-flush">
+          {% for reminder in active_reminders %}
+            <li class="list-group-item px-0 d-flex justify-content-between gap-3">
+              <span>{{ reminder['note'] or 'Follow-up reminder' }}</span>
+              <strong class="text-nowrap">{{ reminder['due_date'] }}</strong>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted mb-0">No active reminders. Add one to remember a follow-up.</p>
+      {% endif %}
+    </div>
+  </div>
+
   <div class="row g-4 mb-4">
     <div class="col-md-6 col-lg-3">
       <div class="metric-card card shadow border-0">
