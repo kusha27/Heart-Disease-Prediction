@@ -9,7 +9,10 @@
           <p class="eyebrow mb-1">Records</p>
           <h2 class="text-navy mb-0">Prediction History</h2>
         </div>
-        <a href="{{ url_for('predict') }}" class="btn btn-primary">New Prediction</a>
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="{{ url_for('export_history') }}" class="btn btn-outline-primary">Export CSV</a>
+          <a href="{{ url_for('predict') }}" class="btn btn-primary">New Prediction</a>
+        </div>
       </div>
 
       <form class="row g-2 mb-4" method="get">
@@ -22,10 +25,14 @@
       </form>
 
       {% if predictions %}
+      <form id="compare-form" method="get" action="{{ url_for('compare_predictions') }}" class="mb-3">
+        <button type="submit" class="btn btn-outline-primary">Compare selected (choose 2)</button>
+      </form>
       <div class="table-responsive">
         <table class="table align-middle">
           <thead>
             <tr>
+              <th scope="col">Compare</th>
               <th>Date & time</th>
               <th>Input summary</th>
               <th>Model output</th>
@@ -36,6 +43,7 @@
           <tbody>
             {% for item in predictions %}
             <tr>
+              <td><input class="form-check-input" type="checkbox" name="prediction_ids" value="{{ item['id'] }}" form="compare-form" aria-label="Select prediction from {{ item['prediction_timestamp'] }} for comparison"></td>
               <td>{{ item['prediction_timestamp'] }}</td>
               <td>{{ item['input_data'][:90] }}</td>
               <td>{{ item['prediction_output'] }}</td>

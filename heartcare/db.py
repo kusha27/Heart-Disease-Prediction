@@ -73,6 +73,24 @@ def get_user_by_id(user_id):
         ).fetchone()
 
 
+def update_user(user_id, username, email, password_hash=None):
+    with get_connection() as conn:
+        if password_hash:
+            conn.execute(
+                """
+                UPDATE users
+                SET username = ?, email = ?, password_hash = ?
+                WHERE id = ?
+                """,
+                (username, email, password_hash, user_id),
+            )
+        else:
+            conn.execute(
+                "UPDATE users SET username = ?, email = ? WHERE id = ?",
+                (username, email, user_id),
+            )
+
+
 def save_prediction(user_id, input_data, prediction_output, model_version):
     with get_connection() as conn:
         conn.execute(
@@ -138,6 +156,36 @@ def risk_distribution_for_user(user_id):
             (user_id,),
         ).fetchall()
         return [dict(row) for row in rows]
+
+
+def prediction_trends_for_user(user_id):
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT strftime('%Y-%m', prediction_timestamp) AS month,
+                   prediction_output,
+                   COUNT(*) AS total
+            FROM predictions
+            WHERE user_id = ?
+              AND prediction_timestamp >= date('now', 'start of month', '-5 months')
+            GROUP BY month, prediction_output
+            ORDER BY month
+            """,
+            (user_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def get_all_user_predictions(user_id):
+    with get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT * FROM predictions
+            WHERE user_id = ?
+            ORDER BY prediction_timestamp DESC
+            """,
+            (user_id,),
+        ).fetchall()
 
 
 init_db()

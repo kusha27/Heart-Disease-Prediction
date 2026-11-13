@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}HeartCare | Profile{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow border-0">
+        <div class="card-body p-4 p-lg-5">
+          <p class="eyebrow mb-1">Account</p>
+          <h2 class="text-navy mb-4">Profile settings</h2>
+          <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-3">
+              <label class="form-label" for="username">Username</label>
+              <input class="form-control" id="username" name="username" value="{{ user['username'] }}" autocomplete="username" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="email">Email</label>
+              <input class="form-control" id="email" name="email" type="email" value="{{ user['email'] }}" autocomplete="email" required>
+            </div>
+            <hr class="my-4">
+            <p class="text-muted">Leave the new password blank to keep your current password.</p>
+            <div class="mb-3">
+              <label class="form-label" for="current_password">Current password</label>
+              <input class="form-control" id="current_password" name="current_password" type="password" autocomplete="current-password" required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label" for="new_password">New password</label>
+              <input class="form-control" id="new_password" name="new_password" type="password" minlength="8" autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
